@@ -66,6 +66,14 @@ class Osoba(models.Model):
     nazwisko = models.CharField(max_length = 100, blank = False, null = False)
     plec = models.CharField(max_length = 1, choices = PLEC_WYBOR, default = "I")
     stanowisko = models.ForeignKey("Stanowisko", on_delete = models.CASCADE)
+    data_dodania = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Osoba: {self.imie} {self.nazwisko}"
+
+    class Meta:
+        ordering = ["nazwisko"]
+
 
 class Stanowisko(models.Model):
     nazwa = models.CharField(max_length = 70, blank = False, null = False)
