@@ -1,0 +1,71 @@
+from rest_framework import serializers
+from .models import Book, Author, Genre, MONTHS, BOOK_FORMATS
+
+# ctrl + / -> komentowanie/odkomentowywanie
+# class BookSerializer(serializers.Serializer):
+#     """Serializer dla modelu Book."""
+
+#     # pole tylko do odczytu — ID książki
+#     id = serializers.IntegerField(read_only=True)
+
+#     # pole wymagane — tytuł książki
+#     title = serializers.CharField(required=True)
+
+#     # pole mapowane z klasy modelu, z podaniem wartości domyślnych
+#     # zwróć uwagę na zapisywaną wartość do bazy dla default={wybór}[0] oraz default={wybór}[0][0]
+#     # w pliku models.py BOOK_FROMATS oraz MONTHS zostały wyniesione jako stałe do poziomu zmiennych skryptu
+#     # (nie wewnątrz modelu)
+
+#     # pole z wyborem miesiąca publikacji
+#     # MONTHS.choices pochodzi z modelu (Enum lub lista krotek)
+#     publication_month = serializers.ChoiceField(choices=MONTHS.choices, default=MONTHS.choices[0][0])
+
+#     # pole z wyborem formatu książki (np. Paperback, Hardcover, eBook)
+#     # BOOK_FORMATS zostało zdefiniowane jako stała w models.py
+#     book_format = serializers.ChoiceField(choices=BOOK_FORMATS, default=BOOK_FORMATS[0][0])
+
+#     # odzwierciedlenie pola w postaci klucza obcego
+#     # przy dodawaniu nowego obiektu możemy odwołać się do istniejącego poprzez inicjalizację nowego obiektu
+#     # np. author=Author({id}) lub wcześniejszym stworzeniu nowej instancji tej klasy
+#     # klucz obcy — autor książki (może być null)
+#     author = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all(), allow_null=True)
+
+#     # klucz obcy — gatunek książki (może być null)
+#     genre = serializers.PrimaryKeyRelatedField(queryset=Genre.objects.all(), allow_null=True)
+
+#     # liczba dostępnych kopii książki
+#     available_copies = serializers.IntegerField(default=1)
+
+#     # przesłonięcie metody create() z klasy serializers.Serializer
+#     # metoda create() — tworzenie nowego obiektu Book
+#     def create(self, validated_data):
+#         return Book.objects.create(**validated_data)
+
+#     # przesłonięcie metody update() z klasy serializers.Serializer
+#     # metoda update() — aktualizacja istniejącego obiektu Book
+#     def update(self, instance, validated_data):
+#         instance.title = validated_data.get('title', instance.title)
+#         instance.publication_month = validated_data.get('publication_month', instance.publication_month)
+#         instance.book_format = validated_data.get('book_format', instance.book_format)
+#         instance.author = validated_data.get('author', instance.author)
+#         instance.genre = validated_data.get('genre', instance.genre)
+#         instance.available_copies = validated_data.get('available_copies', instance.available_copies)
+#         instance.save()
+#         return instance
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        # musimy wskazać klasę modelu
+        model = Book
+        # definiując poniższe pole możemy określić listę właściwości modelu,
+        # które chcemy serializować
+        fields = ['id', 'title', 'publication_month', 'book_format', 'author', 'genre', 'available_copies']
+        # definicja pola modelu tylko do odczytu
+        read_only_fields = ['id']
+        # walidacja wartości pola title
+    def validate_title(self, value):
+        if not value.istitle():
+            raise serializers.ValidationError(
+                "Tytuł książki powinien rozpoczynać się wielką literą!"
+            )
+        return value
