@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Book, Author, Genre, MONTHS, BOOK_FORMATS
+from .models import Book, Author, Genre, MONTHS, BOOK_FORMATS, Osoba, Stanowisko
+from rest_framework.validators import UniqueTogetherValidator
 
-# ctrl + / -> komentowanie/odkomentowywanie
+
 # class BookSerializer(serializers.Serializer):
 #     """Serializer dla modelu Book."""
 
@@ -62,10 +63,88 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'publication_month', 'book_format', 'author', 'genre', 'available_copies']
         # definicja pola modelu tylko do odczytu
         read_only_fields = ['id']
-        # walidacja wartości pola title
+    
     def validate_title(self, value):
-        if not value.istitle():
+        if not value[0].isupper():
             raise serializers.ValidationError(
                 "Tytuł książki powinien rozpoczynać się wielką literą!"
             )
         return value
+    
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = '__all__'
+        
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Author.objects.all(),
+                fields=['first_name', 'last_name']
+            )
+        ]
+
+    def validate(self, data):
+        """
+        Walidacja całego obiektu autora.
+        Sprawdza poprawność formatu imienia, nazwiska i kodu kraju.
+        """
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        country = data.get('country')
+
+        # Imię i nazwisko powinny zaczynać się wielką literą
+        if first_name and not (first_name[0].isupper() and first_name.isalpha()):
+            raise serializers.ValidationError(
+                {"first_name": "Imię powinno rozpoczynać się wielką literą!"}
+            )
+
+        if last_name and not (last_name[0].isupper() and last_name.isalpha()):
+            raise serializers.ValidationError(
+                {"last_name": "Nazwisko powinno rozpoczynać się wielką literą!"}
+            )
+
+        # Kod kraju: dokładnie 2 wielkie litery
+        if country and (len(country) != 2 or not country.isupper()):
+            raise serializers.ValidationError(
+                {"country": "Kod kraju musi składać się z 2 wielkich liter, np. 'PL'."}
+            )
+
+        return data
+    
+    
+def multiple_of_two(value):
+    if value % 2 != 0:
+        raise serializers.ValidationError("Ocena popularności musi być wielokrotnością 2 (np. 0, 2, 4, 6, 8, 10).")
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    popularity_rank = serializers.IntegerField(validators=[multiple_of_two])
+    
+    class Meta:
+        model = Genre
+        fields = "__all__"
+
+
+class OsobaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Osoba
+        fields = "__all__"
+        
+    def validate_imie(self, value):
+        if not (value[0].isupper() and value.isalpha()):
+            raise serializers.ValidationError(
+                "Imię powininno zawierać tylko litery i rozpoczynać się wielką literą!"
+            )
+        return value
+    
+    def validate_nazwisko(self, value):
+        if not (value[0].isupper() and value.isalpha()):
+            raise serializers.ValidationError(
+                "Nazwisko powininno zawierać tylko litery i rozpoczynać się wielką literą!"
+            )
+        return value
+    
+class StanowiskoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stanowisko
+        fields = "__all__"
