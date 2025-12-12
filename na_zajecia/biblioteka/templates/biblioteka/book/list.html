@@ -1,0 +1,16 @@
+{% extends "biblioteka\base.html" %}
+
+{% block title %}Lista obiektów Book{% endblock %}
+
+{% block content %}
+Aktualnie w mojej bazie dodane są poniższe obiekty Book.
+{% for book in books %}
+<p>Tytuł: {{book.title}}</p>
+<p>Miesiąc publikacji: {{book.publication_month}}</p>
+<p>Format: {{book.book_format}}</p>
+<p>Autor: {{book.author}}</p>
+<p>Gatunek: {{book.genre}}</p>
+<p>Dostępne kopie: {{book.available_copies}}</p>
+<hr>
+{% endfor %}
+{% endblock %}

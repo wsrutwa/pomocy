@@ -1,0 +1,21 @@
+{% extends "biblioteka\base.html" %}
+
+{% block title %}Wyszukiwanie obiektów Osoba{% endblock %}
+
+{% block content %}
+<h1>Wyszukaj osobę:</h1>
+<form method = "post">
+    {% csrf_token %}
+    <input type="text" name="nazwisko">
+    <button type="submit">Szukaj</button>
+</form>
+{% if osoby %}
+    {% for osoba in osoby %}
+    <p>Osoba: {{ osoba.imie }} {{ osoba.nazwisko }}</p>
+    <p>Płeć: {{ osoba.plec }}</p>
+    <p>Data dodania: {{ osoba.data_dodania }}</p>
+    <p>Stanowisko: {{ osoba.stanowisko }}</p>
+    <hr>
+    {% endfor %}
+{% endif %}
+{% endblock %}

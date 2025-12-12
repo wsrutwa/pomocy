@@ -1,0 +1,15 @@
+{% extends "biblioteka\base.html" %}
+
+{% block title %}Stanowisko: {{ stanowisko.nazwa }}{% endblock %}
+
+{% block content %}
+<p>Nazwa: {{ stanowisko.nazwa }}</p>
+<p>Opis: {{ stanowisko.opis }}</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" onclick="return confirm('Czy na pewno chcesz usunąć to stanowisko?');">
+        Usuń stanowisko
+    </button>
+</form>
+<hr>
+{% endblock %}
