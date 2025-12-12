@@ -1,0 +1,14 @@
+{% extends "biblioteka\base.html" %}
+
+{% block title %}Lista obiektów Stanowisko{% endblock %}
+
+{% block content %}
+Aktualnie w mojej bazie dodane są poniższe obiekty Stanowisko.
+{% for stanowisko in stanowiska %}
+<p>Nazwa: {{ stanowisko.nazwa }}</p>
+{% if stanowisko.opis %}
+    <p>Opis: {{ stanowisko.opis }}</p>
+{% endif %}
+<hr>
+{% endfor %}
+{% endblock %}

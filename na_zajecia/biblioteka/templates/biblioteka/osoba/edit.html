@@ -1,0 +1,13 @@
+{% extends "biblioteka/base.html" %}
+
+{% block title %}Edytuj Osobę{% endblock %}
+
+{% block content %}
+<h2>Edytuj Osobę: {{ osoba.imie }} {{ osoba.nazwisko }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Zapisz zmiany</button>
+</form>
+<a href="{% url 'osoba-detail' osoba.id %}"><button>Anuluj</button></a>
+{% endblock %}
