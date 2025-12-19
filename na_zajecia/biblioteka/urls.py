@@ -48,4 +48,6 @@ urlpatterns = [
     path('login/', views.user_login, name='user-login'),
     path('logout/', views.user_logout, name='user-logout'),
     path('osoby/', views.osoba_list_html, name='osoba-list-html'),
+    path("osoby/<int:pk>/permisje/", views.osoba_view),
+    path("osoby/<int:pk>/permisje_decorator/", views.osoba_view_decorator),
 ]
