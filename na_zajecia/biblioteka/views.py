@@ -466,14 +466,46 @@ def drf_token_logout(request):
 from functools import wraps
 
 def drf_token_required(view_func):
+    @permission_required('biblioteka.view_osoba', raise_exception=True)
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         token_key = request.session.get('token')
         if not token_key:
             return redirect('drf-token-login')
         try:
-            Token.objects.get(key=token_key)
+            # tutaj przypiszmy ten Token do zmiennej `token`
+            token = Token.objects.get(key=token_key)
         except Token.DoesNotExist:
             return redirect('drf-token-login')
+        # a tutaj zaktualizujmy nasze pole `user` w zapytaniu
+        request.user = token.user
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+# ----------- lab 10 -----------
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import permission_required
+from rest_framework.permissions import BasePermission
+
+@login_required(login_url='user-login')
+def osoba_view(request, pk):
+    if not request.user.has_perm('biblioteka.view_osoba'):
+        raise PermissionDenied()
+    try:
+        osoba = Osoba.objects.get(pk=pk)
+        return HttpResponse(f"Ten użytkownik nazywa się {osoba.imie} {osoba.nazwisko}")
+    except Osoba.DoesNotExist:
+        return HttpResponse(f"W bazie nie ma użytkownika o id={pk}.")
+
+@login_required(login_url='user-login')
+@permission_required('biblioteka.view_osoba', raise_exception=True)
+def osoba_view_decorator(request, pk):
+    try:
+        osoba = Osoba.objects.get(pk=pk)
+        return HttpResponse(f"Ten użytkownik nazywa się {osoba.imie} {osoba.nazwisko}")
+    except Osoba.DoesNotExist:
+        return HttpResponse(f"W bazie nie ma użytkownika o id={pk}.")
+
+class CanViewOsoba(BasePermission):
+   def has_permission(self, request, view):
+       return request.user.has_perm('biblioteka.view_osoba')
